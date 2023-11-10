@@ -55,7 +55,11 @@ export class EquipmentService {
     });
 
     setTimeout(async () => {
-      if (lastReceiveAt + 5000 > Date.now()) return;
+      const { equipment, sessionStartAt, lastReceiveAt } =
+        await this.redisHelper.getKey(this.getEquipmentKeyRedis(id));
+      if (lastReceiveAt + 5000 > Date.now()) {
+        return;
+      }
 
       equipment.status = EQUIPMENT_STATUS.INACTIVE;
       await this.appRepository.use(Equipment).save(equipment);

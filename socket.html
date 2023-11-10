@@ -5,7 +5,8 @@
     integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs"
     crossorigin="anonymous"></script>
   <script>
-    const socket = io('http://localhost:3000');
+    const socket = io('http://14.225.207.82:3000');
+    // const socket = io('http://localhost:3000');
     socket.on('connect', function () {
       console.log('Connected');
 
@@ -13,6 +14,10 @@
     });
     socket.on('sensor-data/equipment-001', function (data) {
       console.log('event', data);
+    });
+
+    socket.on('equipment-status', function (data) {
+      console.log('equipment-status', data);
     });
 
     socket.on('disconnect', function () {

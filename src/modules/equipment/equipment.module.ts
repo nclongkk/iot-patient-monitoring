@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EquipmentService } from './equipment.service';
-import { EquipmentController } from './equipmet.controller';
+import { EquipmentController } from './equipment.controller';
 
 @Module({
   controllers: [EquipmentController],
