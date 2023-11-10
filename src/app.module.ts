@@ -8,16 +8,22 @@ import { DatabaseModule } from './database/database.module';
 import { HttpExceptionFilter } from './exception-filter/http-exception-filter';
 import { ResponseInterceptor } from './interceptor/response.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
+import { EquipmentModule } from './modules/equipment/equipment.module';
 import { PatientModule } from './modules/patient/patient.module';
 import { ScriptModule } from './modules/script/script.module';
+import { RedisHelperModule } from './shared/redis-helper/redis-helper.module';
+import { SocketModule } from './shared/socket/socket.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule.register(),
+    RedisHelperModule,
     ScriptModule,
     AuthModule,
     PatientModule,
+    SocketModule,
+    EquipmentModule,
   ],
   controllers: [AppController],
   providers: [
