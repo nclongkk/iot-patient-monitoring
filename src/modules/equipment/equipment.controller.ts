@@ -22,6 +22,11 @@ export class EquipmentController {
     return this.equipmentService.handleReceiveSensorData(data);
   }
 
+  @Get('mock-sensor-event')
+  async testSocketEvent() {
+    return this.equipmentService.testSocketEvent();
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

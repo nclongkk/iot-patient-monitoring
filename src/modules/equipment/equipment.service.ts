@@ -110,4 +110,22 @@ export class EquipmentService {
     await this.redisHelper.setKey(key, data);
     return data;
   }
+
+  async testSocketEvent() {
+    // interval 1000ms 10 times, call this.handleReceiveSensorData
+    let count = 0;
+    let startAt = Date.now();
+    const interval = setInterval(() => {
+      count++;
+      this.handleReceiveSensorData({
+        id: 'equipment-001',
+        heartbeat: Math.floor(Math.random() * 100),
+        spo2: Math.floor(Math.random() * 100),
+        timestamp: Date.now() - startAt,
+      });
+      if (count === 10) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
 }
