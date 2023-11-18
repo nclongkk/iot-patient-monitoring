@@ -114,7 +114,7 @@ export class EquipmentService {
   async testSocketEvent() {
     // interval 1000ms 10 times, call this.handleReceiveSensorData
     let count = 0;
-    let startAt = Date.now();
+    const startAt = Date.now();
     const interval = setInterval(() => {
       count++;
       this.handleReceiveSensorData({

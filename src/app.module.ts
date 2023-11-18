@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { EquipmentModule } from './modules/equipment/equipment.module';
 import { PatientModule } from './modules/patient/patient.module';
 import { ScriptModule } from './modules/script/script.module';
+import { StatisticModule } from './modules/statistic/statistic.module';
 import { RedisHelperModule } from './shared/redis-helper/redis-helper.module';
 import { SocketModule } from './shared/socket/socket.module';
 
@@ -24,6 +25,7 @@ import { SocketModule } from './shared/socket/socket.module';
     PatientModule,
     SocketModule,
     EquipmentModule,
+    StatisticModule,
   ],
   controllers: [AppController],
   providers: [
