@@ -42,4 +42,8 @@ export class PatientService {
   async updatePatient(id: number, patient: UpdatePatientDto) {
     return this.appRepository.use(Patient).update({ id }, patient);
   }
+
+  async deletePatient(id: number) {
+    return this.appRepository.use(Patient).delete({ id });
+  }
 }
