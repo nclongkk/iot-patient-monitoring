@@ -25,6 +25,9 @@ export class PatientService {
       .findAndCount({
         skip: (page - 1) * limit,
         take: limit,
+        order: {
+          id: 'DESC',
+        },
       });
     return {
       data: patients,
