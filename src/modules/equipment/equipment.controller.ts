@@ -19,6 +19,7 @@ export class EquipmentController {
 
   @Post('listen-sensor-data')
   async listenEquipment(@Body() data: ReceiveSensorDataDto) {
+    console.log(data);
     return this.equipmentService.handleReceiveSensorData(data);
   }
 
