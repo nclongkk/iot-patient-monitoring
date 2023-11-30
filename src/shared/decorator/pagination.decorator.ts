@@ -48,3 +48,33 @@ export const Pagination = createParamDecorator(
     },
   ],
 );
+
+export const Timestamp = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext) => {
+    const queries = ctx.switchToHttp().getRequest().query;
+    return {
+      start: queries['start'],
+      end: queries['end'],
+    };
+  },
+  [
+    (target: any, key: string) => {
+      ApiQuery({
+        name: 'start',
+        schema: {
+          type: 'string',
+          format: 'date-time',
+        },
+        required: false,
+      })(target, key, Object.getOwnPropertyDescriptor(target, key));
+      ApiQuery({
+        name: 'end',
+        schema: {
+          type: 'string',
+          format: 'date-time',
+        },
+        required: false,
+      })(target, key, Object.getOwnPropertyDescriptor(target, key));
+    },
+  ],
+);

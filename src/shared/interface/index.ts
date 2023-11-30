@@ -11,3 +11,8 @@ export interface PaginationResult<T> {
   paging: IPaging;
   data: T[];
 }
+
+export interface TimestampParam {
+  start: string;
+  end: string;
+}

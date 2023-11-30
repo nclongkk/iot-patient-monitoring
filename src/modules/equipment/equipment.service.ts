@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { EQUIPMENT_STATUS, EVENT_TYPE } from '../../constants/local.constant';
 import { AppRepository } from '../../database/database.repository';
 import { Equipment } from '../../database/entities/equipment.entity';
 import { Patient } from '../../database/entities/patient.entity';
+import { SensorDataHistory } from '../../database/entities/sensor-data-history.entity';
+import { TimestampParam } from '../../shared/interface';
 import { RedisHelperService } from '../../shared/redis-helper/redis-helper.service';
 import { SocketGateway } from '../../shared/socket/socket.gateway';
 import { ReceiveSensorDataDto } from './dtos/receive-sensor-data.dto';
@@ -52,6 +55,13 @@ export class EquipmentService {
       spo2,
       timestamp: new Date(sessionStartAt + timestamp),
       equipment,
+    });
+
+    this.appRepository.use(SensorDataHistory).save({
+      equipmentId: id,
+      heartbeat,
+      spo2,
+      timestamp: new Date(sessionStartAt + timestamp),
     });
 
     setTimeout(async () => {
@@ -127,5 +137,25 @@ export class EquipmentService {
         clearInterval(interval);
       }
     }, 1000);
+  }
+
+  async getSensorDataHistory({ start, end }: TimestampParam) {
+    const where = {};
+    if (start && end) {
+      where['timestamp'] = Between(new Date(start), new Date(end));
+    } else if (start) {
+      where['timestamp'] = MoreThanOrEqual(new Date(start));
+    } else if (end) {
+      where['timestamp'] = LessThanOrEqual(new Date(end));
+    }
+    return this.appRepository.use(SensorDataHistory).find({ where });
+  }
+
+  async deleteSensorDataHistory() {
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    return this.appRepository.use(SensorDataHistory).delete({
+      timestamp: LessThanOrEqual(threeDaysAgo),
+    });
   }
 }

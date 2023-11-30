@@ -1,6 +1,8 @@
+import { TimestampParam } from './../../shared/interface/index';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -8,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Timestamp } from '../../shared/decorator/pagination.decorator';
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 import { ReceiveSensorDataDto } from './dtos/receive-sensor-data.dto';
 import { EquipmentService } from './equipment.service';
@@ -33,6 +36,18 @@ export class EquipmentController {
   @ApiBearerAuth()
   async getEquipments() {
     return this.equipmentService.getEquipments();
+  }
+
+  @Get('sensor-data-history')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getSensorDataHistory(@Timestamp() timestamp: TimestampParam) {
+    return this.equipmentService.getSensorDataHistory(timestamp);
+  }
+
+  @Delete('sensor-data-history')
+  async deleteSensorDataHistory() {
+    return this.equipmentService.deleteSensorDataHistory();
   }
 
   @ApiBearerAuth()
