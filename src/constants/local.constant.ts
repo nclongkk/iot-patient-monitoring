@@ -15,9 +15,14 @@ export const AMOUNT_TO_SWITCH_TO_IN_REVIEW_ADS = 10; // $
 export enum EVENT_TYPE {
   EQUIPMENT_STATUS = 'equipment-status',
   SENSOR_DATA = 'sensor-data',
+  NOTIFICATION = 'notification',
 }
 
 export enum EQUIPMENT_STATUS {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
+}
+
+export enum NOTIFICATION_TYPE {
+  SPO2_WARNING = 'SPO2_WARNING',
 }

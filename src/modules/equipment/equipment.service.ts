@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
-import { EQUIPMENT_STATUS, EVENT_TYPE } from '../../constants/local.constant';
+import {
+  EQUIPMENT_STATUS,
+  EVENT_TYPE,
+  NOTIFICATION_TYPE,
+} from '../../constants/local.constant';
 import { AppRepository } from '../../database/database.repository';
 import { Equipment } from '../../database/entities/equipment.entity';
 import { Patient } from '../../database/entities/patient.entity';
 import { SensorDataHistory } from '../../database/entities/sensor-data-history.entity';
+import { Notification } from '../../database/entities/notification.entity';
 import { TimestampParam } from '../../shared/interface';
 import { RedisHelperService } from '../../shared/redis-helper/redis-helper.service';
 import { SocketGateway } from '../../shared/socket/socket.gateway';
@@ -63,6 +68,7 @@ export class EquipmentService {
       spo2,
       timestamp: new Date(sessionStartAt + timestamp),
     });
+    this.checkSpo2AndSendNotification(id, spo2, data);
 
     setTimeout(async () => {
       const { equipment, sessionStartAt, lastReceiveAt } =
@@ -121,22 +127,107 @@ export class EquipmentService {
     return data;
   }
 
+  private async checkSpo2AndSendNotification(
+    equipmentId,
+    spo2,
+    data: ReceiveSensorDataDto,
+  ) {
+    const threshold = 95;
+
+    const warningSessionKey = `equipment:${equipmentId}:warning-session`;
+    const warningSession = await this.redisHelper.getKey(warningSessionKey);
+    if (spo2 < threshold) {
+      if (!warningSession) {
+        const warningSession = {
+          isWarning: false,
+          lastReceiveSpo2: spo2,
+          countSpo2LessThanThreshold: 1,
+          countSpo2GreaterThanThreshold: 0,
+        };
+        await this.redisHelper.setKey(warningSessionKey, warningSession);
+        return;
+      }
+      warningSession.countSpo2LessThanThreshold++;
+      await this.redisHelper.setKey(warningSessionKey, warningSession);
+
+      if (
+        warningSession.isWarning ||
+        warningSession.countSpo2LessThanThreshold < 5
+      ) {
+        return;
+      }
+
+      //Warning
+      this.warningSpo2(data);
+      warningSession.isWarning = true;
+      await this.redisHelper.setKey(warningSessionKey, warningSession);
+    } else {
+      if (!warningSession) {
+        //Patient is healthy, no need to check
+        return;
+      }
+
+      warningSession.lastReceiveSpo2 = spo2;
+      await this.redisHelper.setKey(warningSessionKey, warningSession);
+
+      if (warningSession.lastReceiveSpo2 > threshold) {
+        warningSession.countSpo2GreaterThanThreshold++;
+        await this.redisHelper.setKey(warningSessionKey, warningSession);
+        if (warningSession.countSpo2GreaterThanThreshold > 5) {
+          //Patient is healthy again, no need to check
+          await this.redisHelper.deleteKey(warningSessionKey);
+          return;
+        }
+      } else {
+        warningSession.countSpo2GreaterThanThreshold = 1;
+      }
+    }
+  }
+
+  private async warningSpo2(data: ReceiveSensorDataDto) {
+    try {
+      const { id } = data;
+      const equipment = await this.appRepository.use(Equipment).findOne({
+        where: { id },
+        relations: ['patient'],
+      });
+      const message = `Bệnh nhân ${equipment.patient.name} có chỉ số SpO2 thấp hơn 95%`;
+      console.log(message);
+      this.socketGateway.server.emit(EVENT_TYPE.NOTIFICATION, {
+        equipmentId: id,
+        message,
+      });
+      this.appRepository.use(Notification).save({
+        equipment,
+        message,
+        type: NOTIFICATION_TYPE.SPO2_WARNING,
+        payload: JSON.stringify(data),
+      });
+    } catch (error) {
+      error;
+    }
+  }
+
   async testSocketEvent() {
-    // interval 1000ms 10 times, call this.handleReceiveSensorData
     let count = 0;
     const startAt = Date.now();
     const interval = setInterval(() => {
       count++;
+      //if count from 20 to 40 or 40 to 60, spo2 will be 90, else spo2 will be 100
+      let spo2 = 100;
+      if ((count > 20 && count <= 40) || (count > 60 && count <= 80)) {
+        spo2 = 90;
+      }
       this.handleReceiveSensorData({
         id: 'equipment-001',
         heartbeat: Math.floor(Math.random() * 100),
-        spo2: Math.floor(Math.random() * 100),
+        spo2,
         timestamp: Date.now() - startAt,
       });
-      if (count === 10) {
+      if (count === 100) {
         clearInterval(interval);
       }
-    }, 1000);
+    }, 500);
   }
 
   async getSensorDataHistory({ start, end }: TimestampParam) {

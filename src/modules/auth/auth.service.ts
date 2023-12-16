@@ -38,4 +38,12 @@ export class AuthService {
     const payload = { id: user.id, email: user.email };
     return this.jwtService.signAsync(payload);
   }
+
+  me(userId: number) {
+    // query user by id but not select password
+    return this.appRepository.use(User).findOne({
+      where: { id: userId },
+      select: ['id', 'name', 'email', 'lastReadNotificationAt'],
+    });
+  }
 }

@@ -5,10 +5,12 @@
     integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs"
     crossorigin="anonymous"></script>
   <script>
-    const socket = io('https://patient-monitoring.site/socket.io', {
+    // const socket = io('https://patient-monitoring.site/socket.io', {
+    //   transports: ['websocket'],
+    // });
+    const socket = io('http://localhost:3001/socket.io', {
       transports: ['websocket'],
     });
-    // const socket = io('https://patient-monitoring.site/api/socket');
     // const socket = io('http://localhost:4000/socket.io');
     // connect unsuccessful
     socket.on('connect_error', (err) => {
@@ -25,6 +27,10 @@
 
     socket.on('equipment-status', function (data) {
       console.log('equipment-status', data);
+    });
+
+    socket.on('notification', function (data) {
+      console.log('notification', data);
     });
 
     socket.on('disconnect', function () {

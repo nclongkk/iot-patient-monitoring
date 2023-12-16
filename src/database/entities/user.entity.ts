@@ -23,4 +23,9 @@ export class User extends Base {
   @IsString()
   @Column()
   password?: string;
+
+  @ApiProperty()
+  @IsString()
+  @Column()
+  lastReadNotificationAt?: Date;
 }

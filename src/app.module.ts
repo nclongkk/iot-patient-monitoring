@@ -9,6 +9,7 @@ import { HttpExceptionFilter } from './exception-filter/http-exception-filter';
 import { ResponseInterceptor } from './interceptor/response.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
 import { EquipmentModule } from './modules/equipment/equipment.module';
+import { NotificationModule } from './modules/notification/notification.module';
 import { PatientModule } from './modules/patient/patient.module';
 import { ScriptModule } from './modules/script/script.module';
 import { StatisticModule } from './modules/statistic/statistic.module';
@@ -26,6 +27,7 @@ import { SocketModule } from './shared/socket/socket.module';
     SocketModule,
     EquipmentModule,
     StatisticModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [
