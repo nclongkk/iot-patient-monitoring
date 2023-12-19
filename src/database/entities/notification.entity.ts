@@ -17,4 +17,7 @@ export class Notification extends Base {
 
   @Column()
   payload?: string;
+
+  @Column()
+  addedAt?: Date;
 }

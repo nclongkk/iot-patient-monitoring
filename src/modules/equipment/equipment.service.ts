@@ -202,6 +202,7 @@ export class EquipmentService {
         message,
         type: NOTIFICATION_TYPE.SPO2_WARNING,
         payload: JSON.stringify(data),
+        addedAt: new Date(),
       });
     } catch (error) {
       error;

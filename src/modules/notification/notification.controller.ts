@@ -5,7 +5,6 @@ import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 import { Notification } from '../../database/entities/notification.entity';
 import { FindManyOptions, LessThan, MoreThan } from 'typeorm';
 import { User } from '../../database/entities/user.entity';
-import * as moment from 'moment-timezone';
 
 @Controller('notifications')
 @ApiTags('notifications')
@@ -25,7 +24,7 @@ export class NotificationController {
       console.log('toDate', toDate);
       return await this.appRepository.use(Notification).find({
         order: { id: 'DESC' },
-        where: { createdAt: MoreThan(new Date(toDate)) },
+        where: { addedAt: MoreThan(new Date(toDate)) },
       });
     }
 
@@ -41,13 +40,8 @@ export class NotificationController {
 
   @Patch('read')
   readNotification(@Req() req: any) {
-    const nowInTimeZone0 = moment().tz('UTC'); // Get current date in UTC (timezone 0)
-    console.log(nowInTimeZone0.format()); // Log the date in UTC
-
-    const lastReadNotificationAt = nowInTimeZone0.toDate(); // Convert moment to Date object
-    console.log(lastReadNotificationAt); // Log the date in UTC
     return this.appRepository
       .use(User)
-      .update({ id: req.user.id }, { lastReadNotificationAt });
+      .update({ id: req.user.id }, { lastReadNotificationAt: new Date() });
   }
 }
