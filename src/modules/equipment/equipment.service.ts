@@ -202,6 +202,7 @@ export class EquipmentService {
         message,
         payload: JSON.stringify(data),
         addedAt: new Date(),
+        type: NOTIFICATION_TYPE.SPO2_WARNING,
       };
       this.socketGateway.server.emit(EVENT_TYPE.NOTIFICATION, saveData);
       this.appRepository.use(Notification).save(saveData);
