@@ -68,7 +68,11 @@ export class EquipmentService {
       spo2,
       timestamp: new Date(sessionStartAt + timestamp),
     });
-    this.checkSpo2AndSendNotification(id, spo2, data);
+
+    //Ignore first 3s to reduce noise
+    if (Date.now() - sessionStartAt > 3000) {
+      this.checkSpo2AndSendNotification(id, spo2, data);
+    }
 
     setTimeout(async () => {
       const { equipment, sessionStartAt, lastReceiveAt } =
@@ -193,17 +197,14 @@ export class EquipmentService {
       });
       const message = `Bệnh nhân ${equipment.patient.name} có chỉ số SpO2 thấp hơn 95%`;
       console.log(message);
-      this.socketGateway.server.emit(EVENT_TYPE.NOTIFICATION, {
-        equipmentId: id,
-        message,
-      });
-      this.appRepository.use(Notification).save({
+      const saveData = {
         equipment,
         message,
-        type: NOTIFICATION_TYPE.SPO2_WARNING,
         payload: JSON.stringify(data),
         addedAt: new Date(),
-      });
+      };
+      this.socketGateway.server.emit(EVENT_TYPE.NOTIFICATION, saveData);
+      this.appRepository.use(Notification).save(saveData);
     } catch (error) {
       error;
     }
